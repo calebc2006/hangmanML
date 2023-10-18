@@ -1,10 +1,9 @@
 from model import MainModel, ModelConfig, getLetterFromOutputs, unencode
-from dataloader import DataLoader
+from dataloader import DataLoader, device
 import time
-
 class Trainer():
     def __init__(self, model: MainModel, dataloader: DataLoader):
-        self.model = model
+        self.model = model.to(device)
         self.dataloader = dataloader
         
         self.fraction_correct = 0.5
@@ -80,7 +79,7 @@ def main():
     save_path = 'prev/v2.2-10k-200.pth'
     
     # Load model (if path does not exist, starts from scratch)
-    model = MainModel(model_config, weights_path=save_path)
+    model = MainModel(model_config, weights_path=save_path).to(device)
     
     # Create trainer
     trainer = Trainer(model, dataloader)
