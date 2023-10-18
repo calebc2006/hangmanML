@@ -9,9 +9,8 @@ MIN_WORD_LEN = 3
 random.seed(42)
 
 isCuda = torch.cuda.is_available()
-device = torch.device('cpu')
-if isCuda:
-    device = torch.device('cuda:0')
+device = torch.device("cuda" if isCuda else "cpu")
+        
 
 def get_all_words(filename):
     with open(f'./data/{filename}', 'r') as f:

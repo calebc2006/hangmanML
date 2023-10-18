@@ -12,16 +12,14 @@ class MainModel(nn.Module):
         self.config = config
         
         self.isCuda = torch.cuda.is_available()
-        self.device = torch.device('cpu')
-        if self.isCuda:
-            self.device = torch.device('cuda:0')
+        self.device = torch.device("cuda" if self.isCuda else "cpu")
         
         # input to RNN model is tensor (batch, letter sequence, 1-hot letter encoding)
         self.rnn = nn.LSTM(input_size=config.input_dim,
                         hidden_size=config.hidden_dim,
                         num_layers=config.num_layers,
                         dropout=config.dropout,
-                        bidirectional=True, batch_first=True)
+                        bidirectional=True, batch_first=True).to(self.device)
         
         # preprocess previous guesses before joining with RNN output
         self.prev_guess_layer = nn.Linear(26, config.prev_guess_dim)
@@ -47,9 +45,7 @@ class MainModel(nn.Module):
         """     
         
         # Pack padded inputs and pass through RNN
-        x = nn.utils.rnn.pack_padded_sequence(x.cpu(), x_lengths.cpu(), batch_first=True, enforce_sorted=False).to(torch.float32)
-        if self.isCuda:
-            x = x.cuda()
+        x = nn.utils.rnn.pack_padded_sequence(x.to(self.device), x_lengths.to(self.device), batch_first=True, enforce_sorted=False).to(torch.float32).to(self.device)
         output, hidden = self.rnn(x) # ignore outputs, just use 2nd hidden state, since RNN is for encoding only
     
         # Get RNN output
