@@ -1,11 +1,11 @@
 from model import MainModel, ModelConfig
-from dataloader import Word, MAX_WORD_LEN, MIN_WORD_LEN
+from dataloader import Word, MAX_WORD_LEN, MIN_WORD_LEN, device
 import matplotlib.pyplot as plt
 import statistics
 from tqdm import tqdm
 import time
 
-weights_path = './prev/v2.1-1k-200.pth'
+weights_path = './prev/v2.2-1k-200.pth'
 
 config = ModelConfig()
 model = MainModel(config, weights_path)

@@ -92,9 +92,9 @@ class MainModel(nn.Module):
         return: tensor of shape (max sequence length, output dim)
         """
 
-        encoded_word_t = torch.tensor([encoded_word])
-        word_length_t = torch.tensor([word_length])
-        prev_guesses_t = torch.tensor([prev_guesses])
+        encoded_word_t = torch.tensor([encoded_word]).to(self.device)
+        word_length_t = torch.tensor([word_length]).to(self.device)
+        prev_guesses_t = torch.tensor([prev_guesses]).to(self.device)
 
         output = self.forward(encoded_word_t, word_length_t, prev_guesses_t).tolist()[0]
         return getLetterFromOutputs(output, prev_guesses)
