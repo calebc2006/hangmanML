@@ -84,7 +84,7 @@ def main():
     
     # Create trainer
     trainer = Trainer(model, dataloader)
-    trainer.train(batch_size=20, num_epochs=200, start_epoch=1, save_path=save_path)
+    trainer.train(batch_size=20, num_epochs=200, start_epoch=86, save_path=save_path)
 
             
 if __name__ == "__main__":
