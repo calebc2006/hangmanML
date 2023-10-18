@@ -5,7 +5,7 @@ import random
 import torch
 
 MAX_WORD_LEN = 20
-MIN_WORD_LEN = 3
+MIN_WORD_LEN = 1
 random.seed(42)
 
 isCuda = torch.cuda.is_available()
@@ -13,7 +13,7 @@ device = torch.device("cuda" if isCuda else "cpu")
         
 
 def get_all_words(filename):
-    with open(f'./data/{filename}', 'r') as f:
+    with open(f'./{filename}', 'r') as f:
         raw_words = [word.strip() for word in f.read().splitlines()]
         words = []
         for word in raw_words:
@@ -138,7 +138,7 @@ class DataLoader():
 
 def main():
     print("Initializing DataLoader...")
-    dl = DataLoader(filename='100k.txt', verbose=False)
+    dl = DataLoader(filename='data/100k.txt', verbose=False)
 
     print("Getting Batch...")
     start_time = time.process_time_ns()

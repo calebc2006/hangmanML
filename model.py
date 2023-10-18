@@ -101,11 +101,14 @@ class MainModel(nn.Module):
 
 
 class ModelConfig():
-    def __init__(self):	
+    def __init__(self, version):
+        self.version = version
+        	
         self.input_dim = 28 # (0-25) for each letter, and one null value (26)
         self.hidden_dim = 256
         self.num_layers = 2
         self.dropout = 0.3
+        self.batch_size = 20
         
         self.prev_guess_dim = 128
         self.mid_dim = 128 

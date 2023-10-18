@@ -828,7 +828,7 @@ cheap
 nude
 kids
 finance
-true
+TRUE
 minutes
 else
 mark
@@ -2389,7 +2389,7 @@ wisconsin
 powerful
 dream
 obtained
-false
+FALSE
 da
 cast
 flower

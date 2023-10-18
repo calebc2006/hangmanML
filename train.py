@@ -13,6 +13,7 @@ class Trainer():
         batches_per_epoch = int(self.dataloader.get_num_words() / batch_size)
         print(f'\nTraining to: {save_path}')
         print('Device:', 'cuda' if isCuda else 'cpu')
+        print(f'batch_size: {batch_size}, num_epochs: {num_epochs}')
         
         for epoch_idx in range(start_epoch, num_epochs+1):
             self.dataloader.shuffle()
@@ -75,16 +76,19 @@ class Trainer():
             
             
 def main():
-    dataloader = DataLoader('10k.txt')
-    model_config = ModelConfig()
-    save_path = 'prev/v2.2-10k-200.pth'
+    dataloader = DataLoader('data/10k.txt')
+    model_config = ModelConfig(version='2.3')
+    save_path = 'prev/v2.3-10k-300.pth'
     
     # Load model (if path does not exist, starts from scratch)
     model = MainModel(model_config, weights_path=save_path).to(device)
     
     # Create trainer
     trainer = Trainer(model, dataloader)
-    trainer.train(batch_size=20, num_epochs=200, start_epoch=86, save_path=save_path)
+    trainer.train(batch_size=model_config.batch_size, 
+                  num_epochs=300, 
+                  start_epoch=1, 
+                  save_path=save_path)
 
             
 if __name__ == "__main__":
