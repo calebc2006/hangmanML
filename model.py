@@ -77,7 +77,7 @@ class MainModel(nn.Module):
 
         #actual loss
         loss_func = nn.BCEWithLogitsLoss(weight=weights, reduction='sum')
-        actual_penalty = loss_func(model_out, labels.to(torch.float32))
+        actual_penalty = loss_func(model_out, labels.to(torch.float32).to(self.device))
         return actual_penalty, miss_penalty
 
     def save(self, path):
