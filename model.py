@@ -10,8 +10,10 @@ class MainModel(nn.Module):
         
         super().__init__()
         self.config = config
+        
+        self.isCuda = torch.cuda.is_available()
         self.device = torch.device('cpu')
-        if torch.cuda.is_available():
+        if self.isCuda:
             self.device = torch.device('cuda:0')
         
         # input to RNN model is tensor (batch, letter sequence, 1-hot letter encoding)
@@ -45,7 +47,9 @@ class MainModel(nn.Module):
         """     
         
         # Pack padded inputs and pass through RNN
-        x = nn.utils.rnn.pack_padded_sequence(x.cpu(), x_lengths.cpu(), batch_first=True, enforce_sorted=False).to(torch.float32).to(self.device)
+        x = nn.utils.rnn.pack_padded_sequence(x.cpu(), x_lengths.cpu(), batch_first=True, enforce_sorted=False).to(torch.float32)
+        if self.isCuda:
+            x = x.cuda()
         output, hidden = self.rnn(x) # ignore outputs, just use 2nd hidden state, since RNN is for encoding only
     
         # Get RNN output
