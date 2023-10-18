@@ -1,5 +1,5 @@
 from model import MainModel, ModelConfig, getLetterFromOutputs, unencode
-from dataloader import DataLoader, device
+from dataloader import DataLoader, device, isCuda
 import time
 class Trainer():
     def __init__(self, model: MainModel, dataloader: DataLoader):
@@ -12,6 +12,7 @@ class Trainer():
     def train(self, batch_size, num_epochs, start_epoch=1, save_path=f'/prev/untitled'):
         batches_per_epoch = int(self.dataloader.get_num_words() / batch_size)
         print(f'\nTraining to: {save_path}')
+        print('Device:', 'cuda' if isCuda else 'cpu')
         
         for epoch_idx in range(start_epoch, num_epochs+1):
             self.dataloader.shuffle()
