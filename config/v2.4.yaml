@@ -1,0 +1,17 @@
+version: 2.3
+
+rnn:
+  input_dim: 27
+  hidden_dim: 256
+  num_layers: 2
+  dropout: 0.3
+
+prev_guess:
+  prev_guess_dim: 256
+
+final:
+  mid_dim: 256 
+  output_dim: 26 
+
+  lr: 0.0005
+  batch_size: 16

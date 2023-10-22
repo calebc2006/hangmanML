@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 import os
+import yaml
 
 class MainModel(nn.Module):
     def __init__(self, config, weights_path='none'):
@@ -46,8 +47,8 @@ class MainModel(nn.Module):
         """     
         
         # Pack padded inputs and pass through RNN
-        x = nn.utils.rnn.pack_padded_sequence(x.cpu(), x_lengths.cpu(), batch_first=True, enforce_sorted=False).to(torch.float32).to(self.device)
-        output, hidden = self.rnn(x) # ignore outputs, just use 2nd hidden state, since RNN is for encoding only
+        x = nn.utils.rnn.pack_padded_sequence(x.cpu(), x_lengths.cpu(), batch_first=True, enforce_sorted=False).to(self.device)
+        output, hidden = self.rnn(x.to(torch.float32)) # ignore outputs, just use 2nd hidden state, since RNN is for encoding only
     
         # Get RNN output
         hidden = hidden[-1].view(self.config.num_layers, 2, -1, self.config.hidden_dim)
@@ -102,18 +103,20 @@ class MainModel(nn.Module):
 
 class ModelConfig():
     def __init__(self, version):
-        self.version = version
-        	
-        self.input_dim = 28 # (0-25) for each letter, and one null value (26)
-        self.hidden_dim = 256
-        self.num_layers = 2
-        self.dropout = 0.3
-        self.batch_size = 20
+        with open(f'./config/{version}.yaml') as f:
+            config = yaml.safe_load(f)
         
-        self.prev_guess_dim = 128
-        self.mid_dim = 128 
-        self.output_dim = 26 # one for each letter
-        self.lr = 0.0005
+        self.input_dim = config['rnn']['input_dim'] # (0-25) for each letter, and one null value (26)
+        self.hidden_dim = config['rnn']['hidden_dim']
+        self.num_layers = config['rnn']['num_layers']
+        self.dropout = config['rnn']['dropout']
+        
+        self.prev_guess_dim = config['prev_guess']['prev_guess_dim']
+
+        self.mid_dim = config['final']['mid_dim']
+        self.output_dim = config['final']['output_dim'] # one for each letter
+        self.lr = config['final']['lr']
+        self.batch_size = config['final']['batch_size']
 
 # Makes the model's guess, based on output while ensuring it does not repeat guesses
 def getLetterFromOutputs(output, prev_guesses): 

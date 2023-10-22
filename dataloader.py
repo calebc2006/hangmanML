@@ -5,7 +5,7 @@ import random
 import torch
 
 MAX_WORD_LEN = 20
-MIN_WORD_LEN = 1
+MIN_WORD_LEN = 3
 random.seed(42)
 
 isCuda = torch.cuda.is_available()
@@ -17,6 +17,7 @@ def get_all_words(filename):
         raw_words = [word.strip() for word in f.read().splitlines()]
         words = []
         for word in raw_words:
+            word = word.lower()
             if len(word) >= MIN_WORD_LEN and len(word) <= MAX_WORD_LEN:
                 words.append(Word(word))
         
@@ -37,13 +38,13 @@ class Word():
         
     def encode(self, letters_to_use=[1]*26): # by default, use all letters (a-z)
         '''
-        Returns an tensor of one-hot encoded words, shape (MAX_WORD_LEN, 28)
-        Letters indexed (0-25), index 26 is used for blanks, index 27 is used for padding
+        Returns an tensor of one-hot encoded words, shape (MAX_WORD_LEN, 27)
+        Letters indexed (0-25), index 26 is used for blanks/padding
         '''
         encoded_word = []
         
         for letter in self.string:
-            cur_letter = [0] * 28
+            cur_letter = [0] * 27
             letter_idx = ord(letter) - 97
             if letter != self.blank and letters_to_use[letter_idx]:
                 cur_letter[letter_idx] = 1
@@ -53,8 +54,8 @@ class Word():
             encoded_word.append(cur_letter)
          
         while len(encoded_word) < MAX_WORD_LEN:
-            cur_letter = [0] * 28
-            cur_letter[27] = 1
+            cur_letter = [0] * 27
+            cur_letter[26] = 1
             encoded_word.append(cur_letter)
         return encoded_word
     
@@ -73,6 +74,9 @@ class Word():
             if letter == self.blank:
                 continue
             letter_idx = ord(letter) - 97
+            if letter_idx in letters:
+                continue
+            
             letters.append(letter_idx)
             if letter_idx in others:
                 others.remove(letter_idx)
@@ -109,17 +113,18 @@ class DataLoader():
             word_lengths.append(word.length)
             labels.append(word.encode_label())            
             
-            num_correct_letters = math.floor(fraction_completed * len(word.get_letters(True)))
-            correct_letters_idx = random.sample(word.get_letters(True), num_correct_letters)
+            num_correct_letters = math.floor(fraction_completed * word.num_letters)
+            num_correct_letters = min(num_correct_letters, word.num_letters - 1) # don't allow fully completed words 
+            correct_letters_idx = random.sample(word.get_letters(within=True), num_correct_letters)
             used_letters = [0] * 26
             for idx in correct_letters_idx:
                 used_letters[idx] = 1
             encoded_words.append(word.encode(used_letters))            
             
             num_wrong_guesses = min(math.floor(num_correct_letters / fraction_correct), 26-num_correct_letters)
-            num_wrong_guesses = min(len(word.get_letters(False)), num_wrong_guesses)
+            num_wrong_guesses = min(26 - word.num_letters, num_wrong_guesses)
             
-            wrong_letters_idx = random.sample(word.get_letters(False), num_wrong_guesses)
+            wrong_letters_idx = random.sample(word.get_letters(within=False), num_wrong_guesses)
             for idx in wrong_letters_idx:
                 used_letters[idx] = 1
             prev_guesses.append(used_letters)
@@ -138,7 +143,7 @@ class DataLoader():
 
 def main():
     print("Initializing DataLoader...")
-    dl = DataLoader(filename='data/100k.txt', verbose=False)
+    dl = DataLoader(filename='data/10k.txt', verbose=False)
 
     print("Getting Batch...")
     start_time = time.process_time_ns()

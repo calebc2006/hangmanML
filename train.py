@@ -1,6 +1,7 @@
 from model import MainModel, ModelConfig, getLetterFromOutputs, unencode
 from dataloader import DataLoader, device, isCuda
 import time
+
 class Trainer():
     def __init__(self, model: MainModel, dataloader: DataLoader):
         self.model = model.to(device)
@@ -17,11 +18,11 @@ class Trainer():
         
         for epoch_idx in range(start_epoch, num_epochs+1):
             self.dataloader.shuffle()
-            self.fraction_correct = 0.5 + 0.3 * (epoch_idx / num_epochs)    # Slightly increase accuracy over time
-            self.fraction_completed = 0.8 - 0.6 * (epoch_idx / num_epochs)  # Decrease fraction completed over time
+            self.fraction_correct = 0.5 + 0.3 * (epoch_idx / num_epochs)**1.5    # Slightly increase accuracy over time
+            self.fraction_completed = 0.8 - 0.6 * (epoch_idx / num_epochs)**1.5  # Decrease fraction completed over time
             
             for g in self.model.optimizer.param_groups:
-                g['lr'] = 0.0005 - 0.00049 * (epoch_idx / num_epochs)   # Decrease learning rate over time
+                g['lr'] = 0.0005 - 0.0004 * (epoch_idx / num_epochs)**1.5   # Decrease learning rate over time
             
             epoch_loss = 0
             batch_number = 1
@@ -76,9 +77,13 @@ class Trainer():
             
             
 def main():
-    dataloader = DataLoader('data/10k.txt')
-    model_config = ModelConfig(version='2.3')
-    save_path = 'prev/v2.3-10k-300.pth'
+    version = 'v2.4'
+    dataset = '10k'
+    num_epochs = 300
+    
+    dataloader = DataLoader(f'data/{dataset}.txt')
+    model_config = ModelConfig(version=version)
+    save_path = f'prev/{version}-{dataset}-{num_epochs}.pth'
     
     # Load model (if path does not exist, starts from scratch)
     model = MainModel(model_config, weights_path=save_path).to(device)
@@ -86,7 +91,7 @@ def main():
     # Create trainer
     trainer = Trainer(model, dataloader)
     trainer.train(batch_size=model_config.batch_size, 
-                  num_epochs=300, 
+                  num_epochs=num_epochs, 
                   start_epoch=1, 
                   save_path=save_path)
 

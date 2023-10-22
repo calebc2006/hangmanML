@@ -4,9 +4,10 @@ import matplotlib.pyplot as plt
 import statistics
 from tqdm import tqdm
 import time
+import random
 
 def solve_hangman(model, target_word: str, verbose=False):
-    assert len(target_word) <= MAX_WORD_LEN, len(target_word) >= MIN_WORD_LEN
+    assert len(target_word) <= MAX_WORD_LEN and len(target_word) >= MIN_WORD_LEN, "Invalid word length"
     word = Word('_' * len(target_word))
     prev_guesses = [0]*26
     num_tries = 0
@@ -36,7 +37,7 @@ def solve_hangman(model, target_word: str, verbose=False):
         
     return num_tries, time.time() - start_time
         
-def test_loop(model, filename, fig_path, repeats=3):
+def test_loop(model, filename, fig_path, num_samples, repeats=3):
     num_tries = []
     total_time = 0
     total_count = 0
@@ -44,7 +45,7 @@ def test_loop(model, filename, fig_path, repeats=3):
     with open(filename) as f:
         raw_words = [word.strip() for word in f.read().splitlines()]
         
-        for word in tqdm(raw_words[::1000]):
+        for word in tqdm(random.sample(raw_words, num_samples)):
             if len(word) < MIN_WORD_LEN or len(word) > MAX_WORD_LEN:
                 continue
             
@@ -64,8 +65,8 @@ def test_loop(model, filename, fig_path, repeats=3):
     
     plt.hist(num_tries, bins=range(27))
     plt.title("Distribution of tries taken")
-    plt.show()
     plt.savefig(fig_path)
+    plt.show()
     
 
 def play_game(model):
@@ -77,15 +78,24 @@ def play_game(model):
     
 
 def main():
-    weights_path = 'prev/v2.3-10k-300.pth'
-    config = ModelConfig(version='2.3')
+    version = 'v2.4'
+    dataset = '10k'
+    num_epochs = 300
+    weights_path = f'prev/{version}-{dataset}-{num_epochs}.pth'
+    
+    config = ModelConfig(version=version)
     model = MainModel(config, weights_path).to(device)
 
+
     # FOR TESTING
-    test_loop(model, 'data/10k.txt', 'figures/v2.3-10k-300.png')
+    test_loop(model=model, 
+              filename=f'data/{dataset}.txt', 
+              fig_path=f'figures/{version}-{dataset}-{num_epochs}.png', 
+              num_samples=10,
+              repeats=3)
     
     # FOR NORMAL GAMEPLAY:
-    # play_game()
+    # play_game(model)
     
 if __name__ == "__main__":
     main()
