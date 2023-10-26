@@ -18,11 +18,11 @@ class Trainer():
         
         for epoch_idx in range(start_epoch, num_epochs+1):
             self.dataloader.shuffle()
-            self.fraction_correct = 0.5 + 0.3 * (epoch_idx / num_epochs)**1.5    # Slightly increase accuracy over time
-            self.fraction_completed = 0.8 - 0.6 * (epoch_idx / num_epochs)**1.5  # Decrease fraction completed over time
+            self.fraction_correct = 0.5 + 0.2 * (epoch_idx / num_epochs)**1.4    # Slightly increase accuracy over time
+            self.fraction_completed = 0.8 - 0.6 * (epoch_idx / num_epochs)**1.4  # Decrease fraction completed over time
             
             for g in self.model.optimizer.param_groups:
-                g['lr'] = 0.0005 - 0.0004 * (epoch_idx / num_epochs)**1.5   # Decrease learning rate over time
+                g['lr'] = 0.0005 - 0.00049 * (epoch_idx / num_epochs)**1.4   # Decrease learning rate over time
             
             epoch_loss = 0
             batch_number = 1
@@ -73,12 +73,12 @@ class Trainer():
             letterIdx = getLetterFromOutputs(cur_output, cur_prev)
             
             if (i % 20 == 0): # Only show some val examples for brevity
-                print(f'{unencode(target, length)}: {chr(letterIdx + 97)}')            
+                print(f'{unencode(target, length)}: {chr(letterIdx + 97)}') 
             
             
 def main():
     version = 'v2.4'
-    dataset = '10k'
+    dataset = '20k'
     num_epochs = 300
     
     dataloader = DataLoader(f'data/{dataset}.txt')

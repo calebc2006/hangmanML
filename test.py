@@ -78,7 +78,7 @@ def play_game(model):
     
 
 def main():
-    version = 'v2.4'
+    version = 'v2.3'
     dataset = '10k'
     num_epochs = 300
     weights_path = f'prev/{version}-{dataset}-{num_epochs}.pth'
@@ -91,11 +91,11 @@ def main():
     test_loop(model=model, 
               filename=f'data/{dataset}.txt', 
               fig_path=f'figures/{version}-{dataset}-{num_epochs}.png', 
-              num_samples=10,
+              num_samples=30,
               repeats=3)
     
     # FOR NORMAL GAMEPLAY:
-    # play_game(model)
+    play_game(model)
     
 if __name__ == "__main__":
     main()

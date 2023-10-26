@@ -115,6 +115,7 @@ class DataLoader():
             
             num_correct_letters = math.floor(fraction_completed * word.num_letters)
             num_correct_letters = min(num_correct_letters, word.num_letters - 1) # don't allow fully completed words 
+            num_correct_letters = max(num_correct_letters, 1) # don't allow empty training examples 
             correct_letters_idx = random.sample(word.get_letters(within=True), num_correct_letters)
             used_letters = [0] * 26
             for idx in correct_letters_idx:
