@@ -22,7 +22,7 @@ class Trainer():
             self.fraction_completed = 0.8 - 0.6 * (epoch_idx / num_epochs)**1.4  # Decrease fraction completed over time
             
             for g in self.model.optimizer.param_groups:
-                g['lr'] = 0.0005 - 0.00049 * (epoch_idx / num_epochs)**1.4   # Decrease learning rate over time
+                g['lr'] = 0.0005 - 0.00045 * (epoch_idx / num_epochs)**1.4   # Decrease learning rate over time
             
             epoch_loss = 0
             batch_number = 1

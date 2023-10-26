@@ -35,7 +35,7 @@ class MainModel(nn.Module):
         self.optimizer = torch.optim.Adam(self.parameters(), lr=config.lr)
 
         if weights_path != 'none' and os.path.isfile(weights_path):
-            self.load_state_dict(torch.load(weights_path))
+            self.load_state_dict(torch.load(weights_path, map_location=self.device))
 
     def forward(self, x, x_lengths, prev_guesses):
         """
