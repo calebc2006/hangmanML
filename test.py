@@ -38,7 +38,9 @@ def solve_hangman(model, target_word: str, verbose=False):
         prev_guesses[output] = 1
         num_tries += 1
         
-    return num_tries, time.time() - start_time
+    num_fails = num_tries - Word(target_word).num_letters
+        
+    return num_tries, time.time() - start_time, num_fails
         
 def test_loop(model, filename, fig_path, num_samples, repeats=3):
     num_tries = []
@@ -81,7 +83,136 @@ def play_game(model):
     assert (len(target_word) <= MAX_WORD_LEN or len(target_word) >= MIN_WORD_LEN), "Invalid word length"
         
     num_tries = solve_hangman(model, target_word, verbose=True)
-    print(f'Number of tries: {num_tries[0]}, Time Taken: {round(num_tries[1]*40, 2)}ms')
+    print(f'Number of tries: {num_tries[0]}, Number of fails: {num_tries[2]}\nTime Taken: {round(num_tries[1]*40, 2)}ms')
+
+
+hangman_states = [
+'''
+  +---+
+      |
+      |
+      |
+      |
+      |
+=========
+''',
+'''
+  +---+
+  |   |
+      |
+      |
+      |
+      |
+=========
+''', '''
+  +---+
+  |   |
+  O   |
+      |
+      |
+      |
+=========
+''', '''
+  +---+
+  |   |
+  O   |
+  |   |
+      |
+      |
+=========
+''', '''
+  +---+
+  |   |
+  O   |
+ /|   |
+      |
+      |
+=========
+''', '''
+  +---+
+  |   |
+  O   |
+ /|\\\  |
+      |
+      |
+=========
+''', '''
+  +---+
+  |   |
+  O   |
+ /|\\\  |
+ /    |
+      |
+=========
+''', '''
+  +---+
+  |   |
+  O   |
+ /|\\\  |
+ / \\\  |
+      |
+=========
+''']
+
+def play_stepwise(model):
+    print(hangman_states[0])
+    print("""
+I am an AI hangman bot!
+Lets see if I can guess your word
+Sorry if I fail from time to time, I don't know every english word :(
+Think of a word (5+ letters pls)...
+    """)
+    wordlen = int(input("How long is the word? "))
+    print('\n')
+    
+    word = Word('_'*wordlen)
+    prev_guesses = [0] * 26
+    
+    num_tries = 0
+    num_fails = 0
+    
+    for letter in word.string:
+        print(letter, ' ', end='')
+    print('')
+    for i in range(wordlen):
+        print(i, ' ', end='')
+    
+    while True:        
+        output = model.infer(word.encode(), word.length, prev_guesses)
+        print(f'\nMY GUESS: {chr(output+97)}')
+        
+        prev_guesses[output] = 1
+        num_tries += 1
+        
+        print(f"Tell me the positions of the present {chr(output+97)}'s \n(space-separated numbers, leave empty if not present)")
+        positions = input("> ").split()
+        correct = len(positions) > 0
+        
+        if correct:
+            for i in positions:
+                if (not i.isnumeric) or int(i) >= wordlen or int(i) < 0:
+                    print(f"Invalid position {i}")
+                    input("Restart?")
+                    return
+                word.set_letter(int(i), chr(output+97))
+            
+            if word.is_complete():
+                break            
+        else:
+            num_fails += 1
+            print(hangman_states[min(num_fails, 7)])
+            if num_fails == 7:
+                print("I LOST!")
+                print("But we can still keep going until I get it correct :D ")
+        
+        print('\n')
+        for letter in word.string:
+            print(letter, ' ', end='')
+        print('')
+        for i in range(wordlen):
+            print(i, ' ', end='')
+        
+    print(f"\nSolved {word.string} in {num_tries} steps, with {num_fails} fails.\n\n")
     
 
 def main():
@@ -92,18 +223,23 @@ def main():
     
     config = ModelConfig(version=version)
     model = MainModel(config, weights_path).to(device)
-    model.eval()
-
-    # FOR TESTING
-    test_loop(model=model, 
-              filename=f'data/{dataset}.txt', 
-              fig_path=f'{version}-{dataset}-{num_epochs}', 
-              num_samples=1000,
-              repeats=3)
+    model.eval()    
     
-    # FOR NORMAL GAMEPLAY:
+    # FOR STEPWISE GAMEPLAY
     while True:
-        play_game(model)
+        play_stepwise(model)
+
+    # FOR FAST-FORWARDED GAMEPLAY:
+    # while True:
+    #     play_game(model)
+    
+    # FOR TESTING
+    # test_loop(model=model, 
+    #           filename=f'data/{dataset}.txt', 
+    #           fig_path=f'{version}-{dataset}-{num_epochs}', 
+    #           num_samples=1000,
+    #           repeats=3)
+    
     
 if __name__ == "__main__":
     main()

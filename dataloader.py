@@ -85,6 +85,16 @@ class Word():
             return letters
         return others
     
+    def set_letter(self, pos, val):
+        self.string = self.string[:pos] + val + self.string[pos + 1:]
+        self.num_letters = len(np.unique(list(self.string)))
+        
+    def is_complete(self):
+        for i in self.string:
+            if i == '_':
+                return False
+        return True
+       
 def tensorize(list, value_type=torch.float32):
     return torch.tensor(list).to(device).to(value_type)
 
